@@ -1,0 +1,4 @@
+.DS_Store
+*.dSYM
+notes.txt
+PrintWordCounts
