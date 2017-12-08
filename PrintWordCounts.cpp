@@ -47,26 +47,6 @@ private:
     return false;
   }
 
-  uint32_t hashFunction(string key, uint32_t tableSize) {
-    // use the last characters to compute the hash
-    uint32_t popcount = __builtin_popcount(tableSize - 1);
-    const uint32_t bitsInChar = 8;
-    uint32_t charsNeeded = (popcount / bitsInChar) + 1;
-    assert(charsNeeded <= 4);
-    char lastChars[charsNeeded];
-    for (uint32_t i = 0; i < charsNeeded; i++) {
-      int32_t charIndex = (key.length() - charsNeeded + i);
-      if (charIndex >= 0) {
-        lastChars[i] = key.at(charIndex);
-      } else {
-        lastChars[i] = (char) 0;
-      }
-    }
-    uint32_t* n = (uint32_t*) lastChars;
-    uint32_t mask = tableSize - 1; // tableSize is always a power of 2
-    return (*n) & mask;
-  }
-
   void doubleSize() {
     string* newKeys = new string[tableSize * 2];
     uint32_t* newValues = new uint32_t[tableSize * 2];
@@ -210,6 +190,27 @@ public:
 
     newHashMap->checkRep();
     return newHashMap;
+  }
+
+  static uint32_t hashFunction(string key, uint32_t tableSize) {
+    // use the last characters to compute the hash
+    uint32_t popcount = __builtin_popcount(tableSize - 1);
+    const uint32_t bitsInChar = 8;
+    uint32_t charsNeeded = (popcount / bitsInChar) + 1;
+    assert(charsNeeded <= 4);
+    char lastChars[charsNeeded];
+    for (uint32_t i = 0; i < charsNeeded; i++) {
+      lastChars[i] = (char) 0;
+    }
+    for (uint32_t i = 0; i < charsNeeded; i++) {
+      int32_t charIndex = (key.length() - charsNeeded + i);
+      if (charIndex >= 0) {
+        lastChars[charsNeeded - i - 1] = key.at(charIndex);
+      }
+    }
+    uint32_t* n = (uint32_t*) lastChars;
+    uint32_t mask = tableSize - 1; // tableSize is always a power of 2
+    return (*n) & mask;
   }
 
   uint32_t getSize() {
@@ -402,6 +403,28 @@ void HashMap_makeFromFile_test0() {
   cout << "HashMap_makeFromFile_test0 passed!" << endl;
 }
 
+// HashMap::hashFunction tests
+void HashMap_hashFunction_test0() {
+  cout << "Running HashMap_hashFunction_test0" << endl;
+
+  uint32_t hash = HashMap::hashFunction("a", 268435456); // 2^28
+  assert(hash == 0x61);
+
+  hash = HashMap::hashFunction("hello", 256); // 2^8
+  assert(hash == 0x6F);
+
+  hash = HashMap::hashFunction("hello", 65536); // 2^16
+  assert(hash == 0x6C6F);
+
+  hash = HashMap::hashFunction("hello", 512); // 2^9
+  assert(hash == 0x6F);
+
+  hash = HashMap::hashFunction("helao", 512); // 2^9
+  assert(hash == 0x16F);
+
+  cout << "HashMap_hashFunction_test0 passed!" << endl;
+}
+
 int main(int argc, char *argv[]) {
 #ifdef TEST
   // mergeSort tests
@@ -412,6 +435,9 @@ int main(int argc, char *argv[]) {
 
   // HashMap::makeFromFile tests
   HashMap_makeFromFile_test0();
+
+  // HashMap::hashFunction tests
+  HashMap_hashFunction_test0();
 #endif // TEST
 
   assert(argc == 2);
