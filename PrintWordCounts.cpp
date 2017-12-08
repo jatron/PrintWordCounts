@@ -76,12 +76,9 @@ public:
   }
 
   ~HashMap() {
-    cout << "Before delete keys" << endl;
-    delete keys;
-    cout << "Before delete values" << endl;
-    delete values;
-    cout << "Before delete keyArray" << endl;
-    delete keyArray;
+    delete [] keys;
+    delete [] values;
+    delete [] keyArray;
   }
 
   uint32_t getSize() {
@@ -287,6 +284,8 @@ void MergeSort_test0() {
 
 // HashMap::makeFromFile tests
 void HashMap_makeFromFile_test0() {
+  cout << "Running HashMap_makeFromFile_test0" << endl;
+
   HashMap* wordCounts = makeHashMapFromFile("words.txt");
 
   HashMap* expectedWordCount = new HashMap();
@@ -299,10 +298,10 @@ void HashMap_makeFromFile_test0() {
 
   assert(wordCounts->equals(expectedWordCount));
 
-  cout << "Before delete wordCounts" << endl;
   delete wordCounts;
-  cout << "Before delete expectedWordCount" << endl;
   delete expectedWordCount;
+
+  cout << "HashMap_makeFromFile_test0 passed!" << endl;
 }
 
 int main() {
