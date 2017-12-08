@@ -175,7 +175,16 @@ public:
   }
 
   uint32_t at(string key) {
-    // TODO
+    uint32_t i = hashFunction(key);
+    do {
+      if (keys[i].compare(key) == 0) {
+        return values[i];
+      }
+      // miss, check the next item
+      i++;
+      i %= tableSize;
+    } while (1);
+    assert(false);
     return 0;
   }
 
@@ -195,7 +204,7 @@ public:
         size++;
         break;
       }
-      // conflict, look for the next item
+      // conflict, check the next item
       i++;
       i %= tableSize;
     } while (1);
