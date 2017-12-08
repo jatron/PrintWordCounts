@@ -48,9 +48,23 @@ private:
   }
 
   uint32_t hashFunction(string key, uint32_t tableSize) {
-    // TODO: handle table resizing
-    // TODO: use the last characters to compute the hash
-    return 0;
+    // use the last characters to compute the hash
+    uint32_t popcount = __builtin_popcount(tableSize - 1);
+    const uint32_t bitsInChar = 8;
+    uint32_t charsNeeded = (popcount / bitsInChar) + 1;
+    assert(charsNeeded <= 4);
+    char lastChars[charsNeeded];
+    for (uint32_t i = 0; i < charsNeeded; i++) {
+      int32_t charIndex = (key.length() - charsNeeded + i);
+      if (charIndex >= 0) {
+        lastChars[i] = key.at(charIndex);
+      } else {
+        lastChars[i] = (char) 0;
+      }
+    }
+    uint32_t* n = (uint32_t*) lastChars;
+    uint32_t mask = tableSize - 1; // tableSize is always a power of 2
+    return (*n) & mask;
   }
 
   void doubleSize() {
@@ -245,7 +259,6 @@ public:
   }
 
   void increment(string key) {
-    // TODO: handle table resizing
     // open addressing with linear probing
     uint32_t i = hashFunction(key, tableSize);
     char nullChar[2] = {'\0'};
