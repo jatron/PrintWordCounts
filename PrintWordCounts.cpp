@@ -42,6 +42,16 @@ public:
     values = new uint32_t[startingSize];
     keyArray = new string[startingSize / 8];
     assert(startingSize % 8 == 0);
+    // initialize keys, values, and keyArray
+    char nullChar[2] = {'\0'};
+    string nullString(nullChar);
+    for (uint32_t i = 0; i < startingSize; i++) {
+      keys[i] = nullChar;
+      values[i] = 0;
+    }
+    for (uint32_t i = 0; i < (startingSize / 8); i++) {
+      keyArray[i] = nullChar;
+    }
   }
 
   ~HashMap() {
