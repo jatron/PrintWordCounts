@@ -306,7 +306,7 @@ void HashMap_increment_test0() {
 void HashMap_makeFromFile_test0() {
   cout << "Running HashMap_makeFromFile_test0" << endl;
 
-  HashMap* wordCounts = HashMap::makeFromFile("words.txt");
+  HashMap* wordCounts = HashMap::makeFromFile("./test/words.txt");
 
   HashMap* expectedWordCounts = new HashMap();
   expectedWordCounts->increment("Apple");
