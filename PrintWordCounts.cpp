@@ -89,6 +89,12 @@ private:
     return false;
   }
 
+  uint32_t hashFunction(string key) {
+    // TODO: handle table resizing
+    // TODO: use the last character to compute the hash
+    return 0;
+  }
+
 public:
   HashMap() {
     const uint32_t startingSize = 256;
@@ -108,6 +114,7 @@ public:
     for (uint32_t i = 0; i < (startingSize / 8); i++) {
       keyArray[i] = nullString;
     }
+    checkRep();
   }
 
   ~HashMap() {
@@ -131,6 +138,7 @@ public:
     }
     file.close();
 
+    newHashMap->checkRep();
     return newHashMap;
   }
 
@@ -172,7 +180,26 @@ public:
   }
 
   void increment(string key) {
-    // TODO
+    // TODO: handle table resizing
+    // open addressing with linear probing
+    uint32_t i = hashFunction(key);
+    char nullChar[2] = {'\0'};
+    string nullString(nullChar);
+    do {
+      if (keys[i].compare(nullString) == 0) {
+        keys[i] = key;
+        assert(values[i] == 0);
+        values[i] = 1;
+        assert(keyArray[size].compare(nullString) == 0);
+        keyArray[size] = key;
+        size++;
+        break;
+      }
+      // conflict, look for the next item
+      i++;
+      i %= tableSize;
+    } while (1);
+    checkRep();
   }
 };
 
