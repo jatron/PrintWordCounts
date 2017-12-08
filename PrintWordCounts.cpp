@@ -13,14 +13,14 @@ class HashMap {
   //   uint32_ts
 
   // Representation Invariant:
-  // - the value associated with each non NULL key key in keys is
+  // 1 the value associated with each non NULL key key in keys is
   //   values[indexof(key)]
-  // - the number of keys in the HashTable is equivalent to size
-  // - every non NULL key key in keys is stored in the first size indices of
+  // 2 the number of keys in the HashTable is equivalent to size
+  // 3 every non NULL key key in keys is stored in the first size indices of
   //   keyArray
-  // - the array keys and the array values have size tableSize, and the array
+  // 4 the array keys and the array values have size tableSize, and the array
   //   keyArray has size (tableSize / 8)
-  // - size is always less than or equal to (tableSize / 8)
+  // 5 size is always less than or equal to (tableSize / 8)
 
 private:
   uint32_t size;
@@ -30,7 +30,63 @@ private:
   string* keyArray;
 
   void checkRep() {
+
+    uint32_t nonNullKeyCount = 0;
+    uint32_t nonZeroValueCount = 0;
+    char nullChar[2] = {'\0'};
+    string nullString(nullChar);
+    for (uint32_t i = 0; i < tableSize; i++) {
+      if (keys[i].compare(nullString) != 0) {
+        nonNullKeyCount++;
+        // check that every non NULL key in keys has value greater or equal to 1
+        assert(values[i] >= 1);
+        // check that every non NULL key in keys is in keyArray
+        assert(this->inKeyArray(keys[i]));
+      }
+      if (values[i] != 0) {
+        nonZeroValueCount++;
+      }
+    }
+
+    // check that there are size non NULL strings in keys an size non zero
+    // uint32_ts in values
+    assert(nonNullKeyCount == size);
+    assert(nonZeroValueCount == size);
+
+    for (uint32_t i = 0; i < (tableSize / 8); i++) {
+      if (i < size) {
+        // check that there are size non NULL strings in keyArray
+        assert(keyArray[i].compare(nullString) != 0);
+        // check that every non NULL key in keyArray is in keys
+        assert(this->inKeys(keyArray[i]));
+      } else {
+        assert(keyArray[i].compare(nullString));
+      }
+    }
+
+    // check that size is less than or equal to (tableSize / 8)
+    assert(size <= (tableSize / 8));
+
+    // check that every string appears only once in keys and keyArray
     // TODO
+  }
+
+  bool inKeyArray(string key) {
+    for (uint32_t i = 0; i < size; i++) {
+      if ((keyArray[i]).compare(key) == 0) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  bool inKeys(string key) {
+    for (uint32_t i = 0; i < tableSize; i++) {
+      if ((keys[i]).compare(key) == 0) {
+        return true;
+      }
+    }
+    return false;
   }
 
 public:
@@ -46,11 +102,11 @@ public:
     char nullChar[2] = {'\0'};
     string nullString(nullChar);
     for (uint32_t i = 0; i < startingSize; i++) {
-      keys[i] = nullChar;
+      keys[i] = nullString;
       values[i] = 0;
     }
     for (uint32_t i = 0; i < (startingSize / 8); i++) {
-      keyArray[i] = nullChar;
+      keyArray[i] = nullString;
     }
   }
 
