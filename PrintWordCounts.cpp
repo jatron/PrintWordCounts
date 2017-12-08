@@ -210,6 +210,13 @@ public:
     } while (1);
     checkRep();
   }
+
+  void print() {
+    for (uint32_t i = 0; i < size; i++) {
+      string key = keyArray[i];
+      cout << key << " : " << at(key) << endl;
+    }
+  }
 };
 
 void merge(string* A, uint32_t p, uint32_t q, uint32_t r) {
@@ -285,18 +292,22 @@ void HashMap_makeFromFile_test0() {
 
   HashMap* wordCounts = HashMap::makeFromFile("words.txt");
 
-  HashMap* expectedWordCount = new HashMap();
-  expectedWordCount->increment("Apple");
-  expectedWordCount->increment("apple");
-  expectedWordCount->increment("orange");
-  expectedWordCount->increment("apple");
-  expectedWordCount->increment("bananas");
-  expectedWordCount->increment("bananas");
+  HashMap* expectedWordCounts = new HashMap();
+  expectedWordCounts->increment("Apple");
+  expectedWordCounts->increment("apple");
+  expectedWordCounts->increment("orange");
+  expectedWordCounts->increment("apple");
+  expectedWordCounts->increment("bananas");
+  expectedWordCounts->increment("bananas");
 
-  assert(wordCounts->equals(expectedWordCount));
+  // TODO: delete these prints
+  wordCounts->print();
+  expectedWordCounts->print();
+
+  assert(wordCounts->equals(expectedWordCounts));
 
   delete wordCounts;
-  delete expectedWordCount;
+  delete expectedWordCounts;
 
   cout << "HashMap_makeFromFile_test0 passed!" << endl;
 }
