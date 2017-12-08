@@ -60,7 +60,7 @@ private:
         // check that every non NULL key in keyArray is in keys
         assert(this->inKeys(keyArray[i]));
       } else {
-        assert(keyArray[i].compare(nullString));
+        assert(keyArray[i].compare(nullString) == 0);
       }
     }
 
@@ -91,7 +91,7 @@ private:
 
   uint32_t hashFunction(string key) {
     // TODO: handle table resizing
-    // TODO: use the last character to compute the hash
+    // TODO: use the last characters to compute the hash
     return 0;
   }
 
