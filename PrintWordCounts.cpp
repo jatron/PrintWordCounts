@@ -53,6 +53,48 @@ private:
     return 0;
   }
 
+  void checkRep() {
+
+    uint32_t nonNullKeyCount = 0;
+    uint32_t nonZeroValueCount = 0;
+    char nullChar[2] = {'\0'};
+    string nullString(nullChar);
+    for (uint32_t i = 0; i < tableSize; i++) {
+      if (keys[i].compare(nullString) != 0) {
+        nonNullKeyCount++;
+        // check that every non NULL key in keys has value greater or equal to 1
+        assert(values[i] >= 1);
+        // check that every non NULL key in keys is in keyArray
+        assert(this->inKeyArray(keys[i]));
+      }
+      if (values[i] != 0) {
+        nonZeroValueCount++;
+      }
+    }
+
+    // check that there are size non NULL strings in keys an size non zero
+    // uint32_ts in values
+    assert(nonNullKeyCount == size);
+    assert(nonZeroValueCount == size);
+
+    for (uint32_t i = 0; i < (tableSize / 8); i++) {
+      if (i < size) {
+        // check that there are size non NULL strings in keyArray
+        assert(keyArray[i].compare(nullString) != 0);
+        // check that every non NULL key in keyArray is in keys
+        assert(this->inKeys(keyArray[i]));
+      } else {
+        assert(keyArray[i].compare(nullString) == 0);
+      }
+    }
+
+    // check that size is less than or equal to (tableSize / 8)
+    assert(size <= (tableSize / 8));
+
+    // check that every string appears only once in keys and keyArray
+    // TODO
+  }
+
 public:
   HashMap() {
     const uint32_t startingSize = 256;
@@ -167,49 +209,6 @@ public:
       i %= tableSize;
     } while (1);
     checkRep();
-  }
-
-  // TODO: move checkRep() to private
-  void checkRep() {
-
-    uint32_t nonNullKeyCount = 0;
-    uint32_t nonZeroValueCount = 0;
-    char nullChar[2] = {'\0'};
-    string nullString(nullChar);
-    for (uint32_t i = 0; i < tableSize; i++) {
-      if (keys[i].compare(nullString) != 0) {
-        nonNullKeyCount++;
-        // check that every non NULL key in keys has value greater or equal to 1
-        assert(values[i] >= 1);
-        // check that every non NULL key in keys is in keyArray
-        assert(this->inKeyArray(keys[i]));
-      }
-      if (values[i] != 0) {
-        nonZeroValueCount++;
-      }
-    }
-
-    // check that there are size non NULL strings in keys an size non zero
-    // uint32_ts in values
-    assert(nonNullKeyCount == size);
-    assert(nonZeroValueCount == size);
-
-    for (uint32_t i = 0; i < (tableSize / 8); i++) {
-      if (i < size) {
-        // check that there are size non NULL strings in keyArray
-        assert(keyArray[i].compare(nullString) != 0);
-        // check that every non NULL key in keyArray is in keys
-        assert(this->inKeys(keyArray[i]));
-      } else {
-        assert(keyArray[i].compare(nullString) == 0);
-      }
-    }
-
-    // check that size is less than or equal to (tableSize / 8)
-    assert(size <= (tableSize / 8));
-
-    // check that every string appears only once in keys and keyArray
-    // TODO
   }
 };
 
