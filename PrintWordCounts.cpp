@@ -81,6 +81,25 @@ public:
     delete [] keyArray;
   }
 
+  static HashMap* makeFromFile(string fileName) {
+    HashMap* newHashMap = new HashMap();
+
+    ifstream file;
+    file.open(fileName);
+    if (!file) {
+      cout << "Unable to open file" << endl;
+      exit(1); // terminate with error
+    }
+    string word;
+    while (file >> word) {
+      newHashMap->increment(word);
+    }
+    file.close();
+
+    newHashMap->checkRep();
+    return newHashMap;
+  }
+
   uint32_t getSize() {
     return size;
   }
@@ -194,27 +213,6 @@ public:
   }
 };
 
-// TODO: mayeb you can put this inside the HashMap class
-HashMap* makeHashMapFromFile(string fileName) {
-  HashMap* newHashMap = new HashMap();
-
-  ifstream file;
-  file.open(fileName);
-  if (!file) {
-    cout << "Unable to open file" << endl;
-    exit(1); // terminate with error
-  }
-  string word;
-  while (file >> word) {
-    newHashMap->increment(word);
-  }
-  file.close();
-
-  newHashMap->checkRep();
-  return newHashMap;
-}
-
-
 void merge(string* A, uint32_t p, uint32_t q, uint32_t r) {
   uint32_t n1 = q - p + 1;
   uint32_t n2 = r - q;
@@ -286,7 +284,7 @@ void MergeSort_test0() {
 void HashMap_makeFromFile_test0() {
   cout << "Running HashMap_makeFromFile_test0" << endl;
 
-  HashMap* wordCounts = makeHashMapFromFile("words.txt");
+  HashMap* wordCounts = HashMap::makeFromFile("words.txt");
 
   HashMap* expectedWordCount = new HashMap();
   expectedWordCount->increment("Apple");
@@ -314,7 +312,7 @@ int main() {
 #endif // TEST
 
   // Build the HashMap
-  HashMap* wordCounts = makeHashMapFromFile("words.txt");
+  HashMap* wordCounts = HashMap::makeFromFile("words.txt");
 
   // Initialize array of sorted words
   string sortedWords[wordCounts->getSize()];
