@@ -5,6 +5,8 @@
 
 using namespace std;
 
+#define TABLE_RESIZE_FACTOR 8
+
 class HashMap {
   // Abstraction Function:
   // - represents a HashMap where the keys are strings and the values are
@@ -17,8 +19,8 @@ class HashMap {
   // 3 every non NULL key key in keys is stored in the first size indices of
   //   keyArray
   // 4 the array keys and the array values have size tableSize, and the array
-  //   keyArray has size (tableSize / 8)
-  // 5 size is always less than or equal to (tableSize / 8)
+  //   keyArray has size (tableSize / TABLE_RESIZE_FACTOR)
+  // 5 size is always less than or equal to (tableSize / TABLE_RESIZE_FACTOR)
 
 private:
   uint32_t size;
@@ -45,10 +47,66 @@ private:
     return false;
   }
 
-  uint32_t hashFunction(string key) {
+  uint32_t hashFunction(string key, uint32_t tableSize) {
     // TODO: handle table resizing
     // TODO: use the last characters to compute the hash
     return 0;
+  }
+
+  void doubleSize() {
+    string* newKeys = new string[tableSize * 2];
+    uint32_t* newValues = new uint32_t[tableSize * 2];
+    string* newKeyArray = new string[tableSize / TABLE_RESIZE_FACTOR * 2];
+    uint32_t newTableSize = tableSize * 2;
+    uint32_t newSize = 0;
+    // initialize newKeys, newValues, and newKeyArray
+    char nullChar[2] = {'\0'};
+    string nullString(nullChar);
+    for (uint32_t i = 0; i < newTableSize; i++) {
+      newKeys[i] = nullString;
+      newValues[i] = 0;
+    }
+    for (uint32_t i = 0; i < (newTableSize / TABLE_RESIZE_FACTOR); i++) {
+      newKeyArray[i] = nullString;
+    }
+    // Transfer elements to newKeys, newValues, and newKeyArray
+    for (uint32_t i = 0; i < size; i++) {
+      string key = keyArray[i];
+      uint32_t value = at(key);
+      insert(key, value, newKeys, newValues, newKeyArray, newTableSize,
+          &newSize);
+    }
+    assert(newSize == size);
+    delete keys;
+    delete values;
+    delete keyArray;
+    keys = newKeys;
+    values = newValues;
+    keyArray = newKeyArray;
+    tableSize = newTableSize;
+    size = newSize;
+    checkRep();
+  }
+
+  void insert(string key, uint32_t value, string* keys, uint32_t* values,
+      string* keyArray, uint32_t tableSize, uint32_t* size) {
+    uint32_t i = hashFunction(key, tableSize);
+    char nullChar[2] = {'\0'};
+    string nullString(nullChar);
+    do {
+      if (keys[i].compare(nullString) == 0) {
+        keys[i] = key;
+        assert(values[i] == 0);
+        values[i] = value;
+        assert(keyArray[*size].compare(nullString) == 0);
+        keyArray[*size] = key;
+        (*size)++;
+        break;
+      }
+      // conflict, check the next item
+      i++;
+      i %= tableSize;
+    } while (1);
   }
 
   void checkRep() {
@@ -75,7 +133,7 @@ private:
     assert(nonNullKeyCount == size);
     assert(nonZeroValueCount == size);
 
-    for (uint32_t i = 0; i < (tableSize / 8); i++) {
+    for (uint32_t i = 0; i < (tableSize / TABLE_RESIZE_FACTOR); i++) {
       if (i < size) {
         // check that there are size non NULL strings in keyArray
         assert(keyArray[i].compare(nullString) != 0);
@@ -86,8 +144,8 @@ private:
       }
     }
 
-    // check that size is less than or equal to (tableSize / 8)
-    assert(size <= (tableSize / 8));
+    // check that size is less than or equal to (tableSize /TABLE_RESIZE_FACTOR)
+    assert(size <= (tableSize / TABLE_RESIZE_FACTOR));
 
     // check that every string appears only once in keys and keyArray
     // TODO
@@ -100,8 +158,8 @@ public:
     tableSize = startingSize;
     keys = new string[startingSize];
     values = new uint32_t[startingSize];
-    keyArray = new string[startingSize / 8];
-    assert(startingSize % 8 == 0);
+    keyArray = new string[startingSize / TABLE_RESIZE_FACTOR];
+    assert(startingSize % TABLE_RESIZE_FACTOR == 0);
     // initialize keys, values, and keyArray
     char nullChar[2] = {'\0'};
     string nullString(nullChar);
@@ -109,7 +167,7 @@ public:
       keys[i] = nullString;
       values[i] = 0;
     }
-    for (uint32_t i = 0; i < (startingSize / 8); i++) {
+    for (uint32_t i = 0; i < (startingSize / TABLE_RESIZE_FACTOR); i++) {
       keyArray[i] = nullString;
     }
     checkRep();
@@ -173,7 +231,7 @@ public:
   }
 
   uint32_t at(string key) {
-    uint32_t i = hashFunction(key);
+    uint32_t i = hashFunction(key, tableSize);
     do {
       if (keys[i].compare(key) == 0) {
         return values[i];
@@ -189,11 +247,18 @@ public:
   void increment(string key) {
     // TODO: handle table resizing
     // open addressing with linear probing
-    uint32_t i = hashFunction(key);
+    uint32_t i = hashFunction(key, tableSize);
     char nullChar[2] = {'\0'};
     string nullString(nullChar);
     do {
       if (keys[i].compare(nullString) == 0) {
+        if ((size + 1) >= (tableSize / TABLE_RESIZE_FACTOR)) {
+          // double the size of the HashMap
+          doubleSize();
+          // recompute the hash
+          uint32_t i = hashFunction(key, tableSize);
+          continue;
+        }
         keys[i] = key;
         assert(values[i] == 0);
         values[i] = 1;
