@@ -77,9 +77,9 @@ private:
           &newSize);
     }
     assert(newSize == size);
-    delete keys;
-    delete values;
-    delete keyArray;
+    delete [] keys;
+    delete [] values;
+    delete [] keyArray;
     keys = newKeys;
     values = newValues;
     keyArray = newKeyArray;
