@@ -1,17 +1,33 @@
 #include <iostream>
 #include <cassert>
 #include <climits>
+#include <fstream>
 
 using namespace std;
 
 #define TEST
 
 class HashMap {
+  // Abstraction Function:
+  // - represents a HashMap where the keys are strings and the values are
+  //   uint32_ts
+
+  // Representation Invariant:
+  // - the value associated with each non NULL key key in keys is
+  //   values[indexof(key)]
+  // - the number of keys in the HashTable is equivalent to size
+  // - every non NULL key key in keys is stored in the first size indices of
+  //   keyArray
+  // - the array keys and the array values have size tableSize, and the array
+  //   keyArray has size (tableSize / 8)
+  // - size is always less than or equal to (tableSize / 8)
+
 private:
   uint32_t size;
   uint32_t tableSize;
-  string* strings;
-  uint32_t* words;
+  string* keys;
+  uint32_t* values;
+  string* keyArray;
 
   void checkRep() {
     // TODO
@@ -19,25 +35,80 @@ private:
 
 public:
   HashMap() {
-    const uint32_t startingSize = 100;
+    const uint32_t startingSize = 256;
     size = 0;
     tableSize = startingSize;
-    strings = malloc(sizeof(string) * startingSize);
-    words = malloc(sizeof(uint32_t) * startingSize);
+    keys = new string[startingSize];
+    values = new uint32_t[startingSize];
+    keyArray = new string[startingSize / 8];
+    assert(startingSize % 8 == 0);
   }
 
-  void put(string key, uint32_t value) {
-    uint32_t hash = hashFunction(key);
-
+  ~HashMap() {
+    delete keys;
+    delete values;
+    delete keyArray;
   }
-  // makeFromFile()
-  // getKeyArray()
-  // size()
-  // at()
-  // constructor
-  // put
-  // equals
-}
+
+  static HashMap* makeFromFile(string fileName) {
+    HashMap* newHashMap = new HashMap();
+
+    ifstream file;
+    file.open(fileName);
+    if (!file) {
+      cout << "Unable to open file" << endl;
+      exit(1); // terminate with error
+    }
+    string word;
+    while (file >> word) {
+      newHashMap->increment(word);
+    }
+    file.close();
+
+    return newHashMap;
+  }
+
+  uint32_t getSize() {
+    return size;
+  }
+
+  void getKeyArray(string* keyArray) {
+    for (uint32_t i = 0; i < size; i++) {
+      keyArray[i] = this->keyArray[i];
+    }
+  }
+
+  bool equals(HashMap* otherHashMap) {
+    // check that all key-value pairs in this match a key-value pair in
+    // otherHashMap
+    for (uint32_t i = 0; i < size; i++) {
+      string key = this->keyArray[i];
+      if (this->at(key) != otherHashMap->at(key)) {
+        return false;
+      }
+    }
+    // check that all key-value pairs in otherHashMap match a key-value pair in
+    // this
+    string otherHashMapKeyArray[otherHashMap->getSize()];
+    otherHashMap->getKeyArray(otherHashMapKeyArray);
+    for (uint32_t i = 0; i < otherHashMap->getSize(); i++) {
+      string key = otherHashMapKeyArray[i];
+      if (otherHashMap->at(key) != this->at(key)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  uint32_t at(string key) {
+    // TODO
+    return 0;
+  }
+
+  void increment(string key) {
+    // TODO
+  }
+};
 
 void merge(string* A, uint32_t p, uint32_t q, uint32_t r) {
   uint32_t n1 = q - p + 1;
@@ -74,13 +145,11 @@ void mergeSort(string* A, uint32_t p, uint32_t r) {
   }
 }
 
-/*
-void printWordCounts(HashMap& wordCounts, string* words, uint32_t numberOfWords) {
+void printWordCounts(HashMap* wordCounts, string* words, uint32_t numberOfWords) {
   for (uint32_t i = 0; i < numberOfWords; i++) {
-    cout << words[i] << " : " << wordCounts.at(word) << endl;
+    cout << words[i] << " : " << wordCounts->at(words[i]) << endl;
   }
 }
-*/
 
 // ========== TESTS ==========
 
@@ -113,12 +182,17 @@ void HashMap_makeFromFile_test0() {
   HashMap* wordCounts = HashMap::makeFromFile("words.txt");
 
   HashMap* expectedWordCount = new HashMap();
-  expectedWordCount.put("orange", 1);
-  expectedWordCount.put("bananas", 2);
-  expectedWordCount.put("apple", 2);
-  expectedWordCount.put("Apple", 1);
+  expectedWordCount->increment("Apple");
+  expectedWordCount->increment("apple");
+  expectedWordCount->increment("orange");
+  expectedWordCount->increment("apple");
+  expectedWordCount->increment("bananas");
+  expectedWordCount->increment("bananas");
 
-  assert(wordCounts.equals(expectedWordCount));
+  assert(wordCounts->equals(expectedWordCount));
+
+  delete wordCounts;
+  delete expectedWordCount;
 }
 
 int main() {
@@ -131,17 +205,17 @@ int main() {
 #endif // TEST
 
   // Build the HashMap
-  // HashMap* wordCounts = HashMap::makeFromFile("words.txt");
+  HashMap* wordCounts = HashMap::makeFromFile("words.txt");
 
   // Initialize array of sorted words
-  // string sortedWords[wordCounts.size()];
-  // wordCounts.getKeyArray(sortedWords);
+  string sortedWords[wordCounts->getSize()];
+  wordCounts->getKeyArray(sortedWords);
 
   // Sort the array
-  // mergeSort(sortedWords, 0, wordCounts.size() - 1);
+  mergeSort(sortedWords, 0, wordCounts->getSize() - 1);
 
   // Print word counts
-  // printWordCounts(wordCounts, sortedWords, wordCounts.size());
+  printWordCounts(wordCounts, sortedWords, wordCounts->getSize());
 
   return 0;
 }
