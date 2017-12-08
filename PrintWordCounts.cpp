@@ -5,8 +5,6 @@
 
 using namespace std;
 
-#define TEST
-
 class HashMap {
   // Abstraction Function:
   // - represents a HashMap where the keys are strings and the values are
@@ -203,6 +201,9 @@ public:
         keyArray[size] = key;
         size++;
         break;
+      } else if (keys[i].compare(key) == 0) {
+        values[i]++;
+        break;
       }
       // conflict, check the next item
       i++;
@@ -286,6 +287,21 @@ void MergeSort_test0() {
   cout << "MergeSort_test0 passed!" << endl;
 }
 
+// HashMap::increment tests
+void HashMap_increment_test0() {
+  cout << "Running HashMap_increment_test0" << endl;
+
+  HashMap* newHashMap = new HashMap();
+  newHashMap->increment("apple");
+  assert(newHashMap->at("apple") == 1);
+  newHashMap->increment("apple");
+  assert(newHashMap->at("apple") == 2);
+
+  cout << "HashMap_increment_test0 passed!" << endl;
+
+  delete newHashMap;
+}
+
 // HashMap::makeFromFile tests
 void HashMap_makeFromFile_test0() {
   cout << "Running HashMap_makeFromFile_test0" << endl;
@@ -300,10 +316,6 @@ void HashMap_makeFromFile_test0() {
   expectedWordCounts->increment("bananas");
   expectedWordCounts->increment("bananas");
 
-  // TODO: delete these prints
-  wordCounts->print();
-  expectedWordCounts->print();
-
   assert(wordCounts->equals(expectedWordCounts));
 
   delete wordCounts;
@@ -312,17 +324,23 @@ void HashMap_makeFromFile_test0() {
   cout << "HashMap_makeFromFile_test0 passed!" << endl;
 }
 
-int main() {
+int main(int argc, char *argv[]) {
 #ifdef TEST
   // mergeSort tests
   MergeSort_test0();
+
+  // HashMap::increment tests
+  HashMap_increment_test0();
 
   // HashMap::makeFromFile tests
   HashMap_makeFromFile_test0();
 #endif // TEST
 
+  assert(argc == 2);
+  string fileName(argv[1]);
+
   // Build the HashMap
-  HashMap* wordCounts = HashMap::makeFromFile("words.txt");
+  HashMap* wordCounts = HashMap::makeFromFile(fileName);
 
   // Initialize array of sorted words
   string sortedWords[wordCounts->getSize()];
