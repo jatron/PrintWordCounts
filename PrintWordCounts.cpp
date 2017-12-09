@@ -22,6 +22,9 @@ class HashMap {
   //   keyArray has size (tableSize / TABLE_RESIZE_FACTOR)
   // - size is always less than or equal to (tableSize / TABLE_RESIZE_FACTOR)
 
+  // Implementation:
+  // - This is an open addressing HashMap with linear probing
+
 private:
   uint32_t size;
   uint32_t tableSize;
@@ -136,6 +139,8 @@ private:
     // check that size is less than or equal to (tableSize /TABLE_RESIZE_FACTOR)
     assert(size <= (tableSize / TABLE_RESIZE_FACTOR));
 
+    assert(tableSize % TABLE_RESIZE_FACTOR == 0);
+
     // check that every string appears only once in keys and keyArray
     // TODO
   }
@@ -190,23 +195,36 @@ public:
   }
 
   static uint32_t hashFunction(string key, uint32_t tableSize) {
-    // use the last characters to compute the hash
-    uint32_t popcount = __builtin_popcount(tableSize - 1);
+    // hash = (bits in the last characters of key)
+    // Example: Suppose the tableSize is 2^9 (which is equal to 512) and the key is
+    // "helao"
+    // If the tableSize is to 2^9, then the hash of key needs to be a 9 bit
+    // unsigned integer
+    // To obtain this 9 bit integer representing the hash of key, we take the
+    // last 2 characters of key, and AND them with the mask 0b1_1111_1111
+    // This results in 'ao' & 0b1_1111_1111 = 0x16F
+
+    uint32_t mask = tableSize - 1;
+    // tableSize is always a power of 2, so the lower order bits of mask will
+    // always be 1's and the higher order bits of mask will always be 0's. No
+    // 0's and 1's will be interleaved
+    uint32_t popcount = __builtin_popcount(mask);
     const uint32_t bitsInChar = 8;
     uint32_t charsNeeded = (popcount / bitsInChar) + 1;
     assert(charsNeeded <= 4);
     char lastChars[charsNeeded];
+    // initialize lastChars array
     for (uint32_t i = 0; i < charsNeeded; i++) {
       lastChars[i] = (char) 0;
     }
     for (uint32_t i = 0; i < charsNeeded; i++) {
       int32_t charIndex = (key.length() - charsNeeded + i);
       if (charIndex >= 0) {
+        // Fill up lastChars from the end of the array to the beginning
         lastChars[charsNeeded - i - 1] = key.at(charIndex);
       }
     }
     uint32_t* n = (uint32_t*) lastChars;
-    uint32_t mask = tableSize - 1; // tableSize is always a power of 2
     return (*n) & mask;
   }
 
@@ -257,7 +275,6 @@ public:
   }
 
   void increment(string key) {
-    // open addressing with linear probing
     uint32_t i = hashFunction(key, tableSize);
     do {
       if (keys[i].compare("\0") == 0) {
@@ -272,8 +289,7 @@ public:
         assert(values[i] == 0);
         values[i] = 1;
         assert(keyArray[size].compare("\0") == 0);
-        keyArray[size] = key;
-        size++;
+        keyArray[size++] = key;
         break;
       } else if (keys[i].compare(key) == 0) {
         values[i]++;
@@ -307,10 +323,8 @@ void merge(string* A, uint32_t p, uint32_t q, uint32_t r) {
   for (uint32_t j = 0; j < n2; j++) {
     R[j] = A[q + j + 1];
   }
-  char minCharArray[1] = {'\0'};
-  string minString(minCharArray);
-  L[n1] = minString;
-  R[n2] = minString;
+  L[n1] = "\0";
+  R[n2] = "\0";
   uint32_t i = 0;
   uint32_t j = 0;
   for (uint32_t k = p; k <= r; k++) {
