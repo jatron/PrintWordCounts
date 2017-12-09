@@ -32,18 +32,18 @@ private:
   uint32_t* values;
   string* keyArray;
 
-  bool inKeyArray(string key) {
+  bool inKeyArray(string* key) {
     for (uint32_t i = 0; i < size; i++) {
-      if ((keyArray[i]).compare(key) == 0) {
+      if ((keyArray[i]).compare(*key) == 0) {
         return true;
       }
     }
     return false;
   }
 
-  bool inKeys(string key) {
+  bool inKeys(string* key) {
     for (uint32_t i = 0; i < tableSize; i++) {
-      if ((keys[i]).compare(key) == 0) {
+      if ((keys[i]).compare(*key) == 0) {
         return true;
       }
     }
@@ -113,7 +113,7 @@ private:
         // check that every non NULL key in keys has value greater or equal to 1
         assert(values[i] >= 1);
         // check that every non NULL key in keys is in keyArray
-        assert(this->inKeyArray(keys[i]));
+        assert(this->inKeyArray(&keys[i]));
       }
       if (values[i] != 0) {
         nonZeroValueCount++;
@@ -130,7 +130,7 @@ private:
         // check that there are size non NULL strings in keyArray
         assert(keyArray[i].compare("\0") != 0);
         // check that every non NULL key in keyArray is in keys
-        assert(this->inKeys(keyArray[i]));
+        assert(this->inKeys(&keyArray[i]));
       } else {
         assert(keyArray[i].compare("\0") == 0);
       }
