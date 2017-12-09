@@ -54,14 +54,12 @@ private:
     uint32_t newTableSize = tableSize * 2;
     uint32_t newSize = 0;
     // initialize newKeys, newValues, and newKeyArray
-    char nullChar[1] = {'\0'};
-    string nullString(nullChar);
     for (uint32_t i = 0; i < newTableSize; i++) {
-      newKeys[i] = nullString;
+      newKeys[i] = "\0";
       newValues[i] = 0;
     }
     for (uint32_t i = 0; i < (newTableSize / TABLE_RESIZE_FACTOR); i++) {
-      newKeyArray[i] = nullString;
+      newKeyArray[i] = "\0";
     }
     // Transfer elements to newKeys, newValues, and newKeyArray
     for (uint32_t i = 0; i < size; i++) {
@@ -87,14 +85,12 @@ private:
   void insert(string key, uint32_t value, string* keys, uint32_t* values,
       string* keyArray, uint32_t tableSize, uint32_t* size) {
     uint32_t i = hashFunction(key, tableSize);
-    char nullChar[2] = {'\0'};
-    string nullString(nullChar);
     do {
-      if (keys[i].compare(nullString) == 0) {
+      if (keys[i].compare("\0") == 0) {
         keys[i] = key;
         assert(values[i] == 0);
         values[i] = value;
-        assert(keyArray[*size].compare(nullString) == 0);
+        assert(keyArray[*size].compare("\0") == 0);
         keyArray[*size] = key;
         (*size)++;
         break;
@@ -108,10 +104,8 @@ private:
   void checkRep() {
     uint32_t nonNullKeyCount = 0;
     uint32_t nonZeroValueCount = 0;
-    char nullChar[2] = {'\0'};
-    string nullString(nullChar);
     for (uint32_t i = 0; i < tableSize; i++) {
-      if (keys[i].compare(nullString) != 0) {
+      if (keys[i].compare("\0") != 0) {
         nonNullKeyCount++;
         // check that every non NULL key in keys has value greater or equal to 1
         assert(values[i] >= 1);
@@ -131,11 +125,11 @@ private:
     for (uint32_t i = 0; i < (tableSize / TABLE_RESIZE_FACTOR); i++) {
       if (i < size) {
         // check that there are size non NULL strings in keyArray
-        assert(keyArray[i].compare(nullString) != 0);
+        assert(keyArray[i].compare("\0") != 0);
         // check that every non NULL key in keyArray is in keys
         assert(this->inKeys(keyArray[i]));
       } else {
-        assert(keyArray[i].compare(nullString) == 0);
+        assert(keyArray[i].compare("\0") == 0);
       }
     }
 
@@ -156,14 +150,12 @@ public:
     keyArray = new string[startingSize / TABLE_RESIZE_FACTOR];
     assert(startingSize % TABLE_RESIZE_FACTOR == 0);
     // initialize keys, values, and keyArray
-    char nullChar[2] = {'\0'};
-    string nullString(nullChar);
     for (uint32_t i = 0; i < startingSize; i++) {
-      keys[i] = nullString;
+      keys[i] = "\0";
       values[i] = 0;
     }
     for (uint32_t i = 0; i < (startingSize / TABLE_RESIZE_FACTOR); i++) {
-      keyArray[i] = nullString;
+      keyArray[i] = "\0";
     }
 #ifndef NDEBUG
     checkRep();
@@ -267,10 +259,8 @@ public:
   void increment(string key) {
     // open addressing with linear probing
     uint32_t i = hashFunction(key, tableSize);
-    char nullChar[2] = {'\0'};
-    string nullString(nullChar);
     do {
-      if (keys[i].compare(nullString) == 0) {
+      if (keys[i].compare("\0") == 0) {
         if ((size + 1) >= (tableSize / TABLE_RESIZE_FACTOR)) {
           // double the size of the HashMap
           doubleSize();
@@ -281,7 +271,7 @@ public:
         keys[i] = key;
         assert(values[i] == 0);
         values[i] = 1;
-        assert(keyArray[size].compare(nullString) == 0);
+        assert(keyArray[size].compare("\0") == 0);
         keyArray[size] = key;
         size++;
         break;
