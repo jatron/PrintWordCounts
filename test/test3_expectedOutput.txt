@@ -1,0 +1,4 @@
+orange : 1
+bananas : 2
+apple : 2
+Apple : 1

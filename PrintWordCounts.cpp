@@ -79,7 +79,9 @@ private:
     keyArray = newKeyArray;
     tableSize = newTableSize;
     size = newSize;
+#ifndef NDEBUG
     checkRep();
+#endif
   }
 
   void insert(string key, uint32_t value, string* keys, uint32_t* values,
@@ -104,6 +106,7 @@ private:
   }
 
   void checkRep() {
+    cout << "checkRep()" << endl;
 
     uint32_t nonNullKeyCount = 0;
     uint32_t nonZeroValueCount = 0;
@@ -164,7 +167,9 @@ public:
     for (uint32_t i = 0; i < (startingSize / TABLE_RESIZE_FACTOR); i++) {
       keyArray[i] = nullString;
     }
+#ifndef NDEBUG
     checkRep();
+#endif
   }
 
   ~HashMap() {
@@ -188,7 +193,9 @@ public:
     }
     file.close();
 
+#ifndef NDEBUG
     newHashMap->checkRep();
+#endif
     return newHashMap;
   }
 
@@ -288,7 +295,9 @@ public:
       i++;
       i %= tableSize;
     } while (1);
+#ifndef NDEBUG
     checkRep();
+#endif
   }
 
   void print() {
