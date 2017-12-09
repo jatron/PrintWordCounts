@@ -173,11 +173,11 @@ public:
     delete [] keyArray;
   }
 
-  static HashMap* makeFromFile(string fileName) {
+  static HashMap* makeFromFile(string* fileName) {
     HashMap* newHashMap = new HashMap();
 
     ifstream file;
-    file.open(fileName);
+    file.open(*fileName);
     if (!file) {
       cout << "Unable to open file" << endl;
       exit(1); // terminate with error
@@ -397,7 +397,8 @@ void HashMap_increment_test0() {
 void HashMap_makeFromFile_test0() {
   cout << "Running HashMap_makeFromFile_test0" << endl;
 
-  HashMap* wordCounts = HashMap::makeFromFile("./test/words.txt");
+  string fileName = "./test/words.txt";
+  HashMap* wordCounts = HashMap::makeFromFile(&fileName);
 
   HashMap* expectedWordCounts = new HashMap();
   string Apple = "Apple";
@@ -464,7 +465,7 @@ int main(int argc, char *argv[]) {
   string fileName(argv[1]);
 
   // Build the HashMap
-  HashMap* wordCounts = HashMap::makeFromFile(fileName);
+  HashMap* wordCounts = HashMap::makeFromFile(&fileName);
 
   // Initialize array of sorted words
   string sortedWords[wordCounts->getSize()];
