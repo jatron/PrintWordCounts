@@ -332,7 +332,7 @@ void merge(string* A, uint32_t p, uint32_t q, uint32_t r) {
   }
 }
 
-void mergeSort(string* A, uint32_t p, uint32_t r) {
+void mergeSort(string* A, int32_t p, int32_t r) {
   if (p < r) {
     uint32_t q = (p + r) / 2;
     mergeSort(A, p, q);
