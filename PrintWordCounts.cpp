@@ -67,7 +67,7 @@ private:
     // Transfer elements to newKeys, newValues, and newKeyArray
     for (uint32_t i = 0; i < size; i++) {
       string key = keyArray[i];
-      uint32_t value = at(key);
+      uint32_t value = at(&key);
       insert(key, value, newKeys, newValues, newKeyArray, newTableSize,
           &newSize);
     }
@@ -87,7 +87,7 @@ private:
 
   void insert(string key, uint32_t value, string* keys, uint32_t* values,
       string* keyArray, uint32_t tableSize, uint32_t* size) {
-    uint32_t i = hashFunction(key, tableSize);
+    uint32_t i = hashFunction(&key, tableSize);
     do {
       if (keys[i].compare("\0") == 0) {
         keys[i] = key;
@@ -184,7 +184,7 @@ public:
     }
     string word;
     while (file >> word) {
-      newHashMap->increment(word);
+      newHashMap->increment(&word);
     }
     file.close();
 
@@ -194,7 +194,7 @@ public:
     return newHashMap;
   }
 
-  static uint32_t hashFunction(string key, uint32_t tableSize) {
+  static uint32_t hashFunction(string* key, uint32_t tableSize) {
     // hash = (bits in the last characters of key)
     // Example: Suppose the tableSize is 2^9 (which is equal to 512) and the key is
     // "helao"
@@ -218,10 +218,10 @@ public:
       lastChars[i] = (char) 0;
     }
     for (uint32_t i = 0; i < charsNeeded; i++) {
-      int32_t charIndex = (key.length() - charsNeeded + i);
+      int32_t charIndex = ((*key).length() - charsNeeded + i);
       if (charIndex >= 0) {
         // Fill up lastChars from the end of the array to the beginning
-        lastChars[charsNeeded - i - 1] = key.at(charIndex);
+        lastChars[charsNeeded - i - 1] = (*key).at(charIndex);
       }
     }
     uint32_t* n = (uint32_t*) lastChars;
@@ -243,7 +243,7 @@ public:
     // otherHashMap
     for (uint32_t i = 0; i < size; i++) {
       string key = this->keyArray[i];
-      if (this->at(key) != otherHashMap->at(key)) {
+      if (this->at(&key) != otherHashMap->at(&key)) {
         return false;
       }
     }
@@ -253,17 +253,17 @@ public:
     otherHashMap->getKeyArray(otherHashMapKeyArray);
     for (uint32_t i = 0; i < otherHashMap->getSize(); i++) {
       string key = otherHashMapKeyArray[i];
-      if (otherHashMap->at(key) != this->at(key)) {
+      if (otherHashMap->at(&key) != this->at(&key)) {
         return false;
       }
     }
     return true;
   }
 
-  uint32_t at(string key) {
+  uint32_t at(string* key) {
     uint32_t i = hashFunction(key, tableSize);
     do {
-      if (keys[i].compare(key) == 0) {
+      if (keys[i].compare(*key) == 0) {
         return values[i];
       }
       // miss, check the next item
@@ -274,7 +274,7 @@ public:
     return 0;
   }
 
-  void increment(string key) {
+  void increment(string* key) {
     uint32_t i = hashFunction(key, tableSize);
     do {
       if (keys[i].compare("\0") == 0) {
@@ -285,13 +285,13 @@ public:
           uint32_t i = hashFunction(key, tableSize);
           continue;
         }
-        keys[i] = key;
+        keys[i] = *key;
         assert(values[i] == 0);
         values[i] = 1;
         assert(keyArray[size].compare("\0") == 0);
-        keyArray[size++] = key;
+        keyArray[size++] = *key;
         break;
-      } else if (keys[i].compare(key) == 0) {
+      } else if (keys[i].compare(*key) == 0) {
         values[i]++;
         break;
       }
@@ -307,7 +307,7 @@ public:
   void print() {
     for (uint32_t i = 0; i < size; i++) {
       string key = keyArray[i];
-      cout << key << " : " << at(key) << endl;
+      cout << key << " : " << at(&key) << endl;
     }
   }
 };
@@ -347,7 +347,7 @@ void mergeSort(string* A, int32_t p, int32_t r) {
 
 void printWordCounts(HashMap* wordCounts, string* words, uint32_t numberOfWords) {
   for (uint32_t i = 0; i < numberOfWords; i++) {
-    cout << words[i] << " : " << wordCounts->at(words[i]) << endl;
+    cout << words[i] << " : " << wordCounts->at(&words[i]) << endl;
   }
 }
 
@@ -382,10 +382,11 @@ void HashMap_increment_test0() {
   cout << "Running HashMap_increment_test0" << endl;
 
   HashMap* newHashMap = new HashMap();
-  newHashMap->increment("apple");
-  assert(newHashMap->at("apple") == 1);
-  newHashMap->increment("apple");
-  assert(newHashMap->at("apple") == 2);
+  string apple = "apple";
+  newHashMap->increment(&apple);
+  assert(newHashMap->at(&apple) == 1);
+  newHashMap->increment(&apple);
+  assert(newHashMap->at(&apple) == 2);
 
   cout << "HashMap_increment_test0 passed!" << endl;
 
@@ -399,12 +400,16 @@ void HashMap_makeFromFile_test0() {
   HashMap* wordCounts = HashMap::makeFromFile("./test/words.txt");
 
   HashMap* expectedWordCounts = new HashMap();
-  expectedWordCounts->increment("Apple");
-  expectedWordCounts->increment("apple");
-  expectedWordCounts->increment("orange");
-  expectedWordCounts->increment("apple");
-  expectedWordCounts->increment("bananas");
-  expectedWordCounts->increment("bananas");
+  string Apple = "Apple";
+  string apple = "apple";
+  string orange = "orange";
+  string bananas = "bananas";
+  expectedWordCounts->increment(&Apple);
+  expectedWordCounts->increment(&apple);
+  expectedWordCounts->increment(&orange);
+  expectedWordCounts->increment(&apple);
+  expectedWordCounts->increment(&bananas);
+  expectedWordCounts->increment(&bananas);
 
   assert(wordCounts->equals(expectedWordCounts));
 
@@ -418,19 +423,23 @@ void HashMap_makeFromFile_test0() {
 void HashMap_hashFunction_test0() {
   cout << "Running HashMap_hashFunction_test0" << endl;
 
-  uint32_t hash = HashMap::hashFunction("a", 268435456); // 2^28
+  string a = "a";
+  string hello = "hello";
+  string helao = "helao";
+
+  uint32_t hash = HashMap::hashFunction(&a, 268435456); // 2^28
   assert(hash == 0x61);
 
-  hash = HashMap::hashFunction("hello", 256); // 2^8
+  hash = HashMap::hashFunction(&hello, 256); // 2^8
   assert(hash == 0x6F);
 
-  hash = HashMap::hashFunction("hello", 65536); // 2^16
+  hash = HashMap::hashFunction(&hello, 65536); // 2^16
   assert(hash == 0x6C6F);
 
-  hash = HashMap::hashFunction("hello", 512); // 2^9
+  hash = HashMap::hashFunction(&hello, 512); // 2^9
   assert(hash == 0x6F);
 
-  hash = HashMap::hashFunction("helao", 512); // 2^9
+  hash = HashMap::hashFunction(&helao, 512); // 2^9
   assert(hash == 0x16F);
 
   cout << "HashMap_hashFunction_test0 passed!" << endl;
