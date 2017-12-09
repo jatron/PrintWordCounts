@@ -106,8 +106,6 @@ private:
   }
 
   void checkRep() {
-    cout << "checkRep()" << endl;
-
     uint32_t nonNullKeyCount = 0;
     uint32_t nonZeroValueCount = 0;
     char nullChar[2] = {'\0'};
