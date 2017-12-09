@@ -68,7 +68,7 @@ private:
     for (uint32_t i = 0; i < size; i++) {
       string key = keyArray[i];
       uint32_t value = at(&key);
-      insert(key, value, newKeys, newValues, newKeyArray, newTableSize,
+      insert(&key, value, newKeys, newValues, newKeyArray, newTableSize,
           &newSize);
     }
     assert(newSize == size);
@@ -85,16 +85,16 @@ private:
 #endif
   }
 
-  void insert(string key, uint32_t value, string* keys, uint32_t* values,
+  void insert(string* key, uint32_t value, string* keys, uint32_t* values,
       string* keyArray, uint32_t tableSize, uint32_t* size) {
-    uint32_t i = hashFunction(&key, tableSize);
+    uint32_t i = hashFunction(key, tableSize);
     do {
       if (keys[i].compare("\0") == 0) {
-        keys[i] = key;
+        keys[i] = *key;
         assert(values[i] == 0);
         values[i] = value;
         assert(keyArray[*size].compare("\0") == 0);
-        keyArray[*size] = key;
+        keyArray[*size] = *key;
         (*size)++;
         break;
       }
