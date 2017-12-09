@@ -13,14 +13,14 @@ class HashMap {
   //   uint32_ts
 
   // Representation Invariant:
-  // 1 the value associated with each non NULL key key in keys is
+  // - the value associated with each non NULL key key in keys is
   //   values[indexof(key)]
-  // 2 the number of keys in the HashTable is equivalent to size
-  // 3 every non NULL key key in keys is stored in the first size indices of
+  // - the number of keys in the HashTable is equivalent to size
+  // - every non NULL key key in keys is stored in the first size indices of
   //   keyArray
-  // 4 the array keys and the array values have size tableSize, and the array
+  // - the array keys and the array values have size tableSize, and the array
   //   keyArray has size (tableSize / TABLE_RESIZE_FACTOR)
-  // 5 size is always less than or equal to (tableSize / TABLE_RESIZE_FACTOR)
+  // - size is always less than or equal to (tableSize / TABLE_RESIZE_FACTOR)
 
 private:
   uint32_t size;
@@ -54,7 +54,7 @@ private:
     uint32_t newTableSize = tableSize * 2;
     uint32_t newSize = 0;
     // initialize newKeys, newValues, and newKeyArray
-    char nullChar[2] = {'\0'};
+    char nullChar[1] = {'\0'};
     string nullString(nullChar);
     for (uint32_t i = 0; i < newTableSize; i++) {
       newKeys[i] = nullString;
@@ -317,7 +317,7 @@ void merge(string* A, uint32_t p, uint32_t q, uint32_t r) {
   for (uint32_t j = 0; j < n2; j++) {
     R[j] = A[q + j + 1];
   }
-  char minCharArray[2] = {'\0'};
+  char minCharArray[1] = {'\0'};
   string minString(minCharArray);
   L[n1] = minString;
   R[n2] = minString;
